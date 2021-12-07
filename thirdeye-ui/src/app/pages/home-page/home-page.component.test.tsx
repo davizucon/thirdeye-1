@@ -32,6 +32,8 @@ jest.mock("../../utils/routes/routes.util", () => ({
         .fn()
         .mockReturnValue("testSubscriptionGroupsPath"),
     getMetricsPath: jest.fn().mockReturnValue("testMetricsPath"),
+    getDatasetsPath: jest.fn().mockReturnValue("testDatasetsPath"),
+    getDatasourcesPath: jest.fn().mockReturnValue("testDatasourcesPath"),
 }));
 
 jest.mock("../../components/page-contents/page-contents.component", () => ({
@@ -97,7 +99,7 @@ describe("Home Page", () => {
         expect(mockPush).toHaveBeenCalledWith("testAnomaliesPath");
     });
 
-    it("should navigate to configuartion path on configuration button click", async () => {
+    it("should navigate to configuration path on configuration button click", async () => {
         act(() => {
             render(<HomePage />);
         });

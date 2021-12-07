@@ -39,13 +39,6 @@ jest.mock("@startree-ui/platform-ui", () => ({
     AppLoadingIndicatorV1: jest.fn().mockReturnValue("testLoadingIndicatorV1"),
 }));
 
-jest.mock(
-    "../../pages/configuration-page/configuration-page.component",
-    () => ({
-        ConfigurationPage: jest.fn().mockReturnValue("testConfigurationPage"),
-    })
-);
-
 jest.mock("../subscription-groups/subscription-groups.router", () => ({
     SubscriptionGroupsRouter: jest
         .fn()
@@ -97,7 +90,7 @@ describe("Configuration Router", () => {
         expect(mockPush).toHaveBeenCalledWith("testConfigurationPath");
     });
 
-    it("should render configuration page at exact configuration path", async () => {
+    it("should render configuration page at exact configuration path that is redirected to subscriptions group", async () => {
         render(
             <MemoryRouter initialEntries={[AppRoute.CONFIGURATION]}>
                 <ConfigurationRouter />
@@ -105,7 +98,7 @@ describe("Configuration Router", () => {
         );
 
         await expect(
-            screen.findByText("testConfigurationPage")
+            screen.findByText("testSubscriptionGroupsRouter")
         ).resolves.toBeInTheDocument();
     });
 

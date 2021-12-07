@@ -29,6 +29,8 @@ jest.mock("../../utils/routes/routes.util", () => ({
         .fn()
         .mockReturnValue("testSubscriptionGroupsPath"),
     getMetricsPath: jest.fn().mockReturnValue("testMetricsPath"),
+    getDatasetsPath: jest.fn().mockReturnValue("testDatasetsPath"),
+    getDatasourcesPath: jest.fn().mockReturnValue("testDatasourcesPath"),
 }));
 
 jest.mock("../../components/page-contents/page-contents.component", () => ({
