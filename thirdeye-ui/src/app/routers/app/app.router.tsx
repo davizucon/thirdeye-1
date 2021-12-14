@@ -3,6 +3,7 @@ import React, { FunctionComponent, lazy, Suspense } from "react";
 import { Route, Switch } from "react-router-dom";
 import { useAuth } from "../../components/auth-provider/auth-provider.component";
 import { AppRoute } from "../../utils/routes/routes.util";
+import { RootCauseAnalysisRouter } from "../root-cause-analysis/rca.router";
 
 const AlertsRouter = lazy(() =>
     import(
@@ -54,6 +55,12 @@ export const AppRouter: FunctionComponent = () => {
                     <Route
                         component={ConfigurationRouter}
                         path={AppRoute.CONFIGURATION}
+                    />
+
+                    {/* Direct all configuration paths to root cause analysis router */}
+                    <Route
+                        component={RootCauseAnalysisRouter}
+                        path={AppRoute.ROOT_CAUSE_ANALYSIS}
                     />
 
                     {/* Direct all other paths to general authenticated router */}
