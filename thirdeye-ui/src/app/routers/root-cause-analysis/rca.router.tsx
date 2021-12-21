@@ -11,6 +11,12 @@ import { Route, Switch, useHistory } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { AppRoute } from "../../utils/routes/routes.util";
 
+const RootCauseAnalysisForAnomalyPage = lazy(() =>
+    import(
+        /* webpackChunkName: "root-analysis-for-anomaly-page" */ "../../pages/root-cause-analysis-for-anomaly-page/root-cause-analysis-for-anomaly-page.component"
+    ).then((module) => ({ default: module.RootCauseAnalysisForAnomalyPage }))
+);
+
 const PageNotFoundPage = lazy(() =>
     import(
         /* webpackChunkName: "page-not-found-page" */ "../../pages/page-not-found-page/page-not-found-page.component"
@@ -42,7 +48,11 @@ export const RootCauseAnalysisRouter: FunctionComponent = () => {
         <Suspense fallback={<AppLoadingIndicatorV1 />}>
             <Switch>
                 {/* Root cause for an anomaly path */}
-                <Route exact path={AppRoute.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY} />
+                <Route
+                    exact
+                    component={RootCauseAnalysisForAnomalyPage}
+                    path={AppRoute.ROOT_CAUSE_ANALYSIS_FOR_ANOMALY}
+                />
 
                 {/* No match found, render page not found */}
                 <Route component={PageNotFoundPage} />
