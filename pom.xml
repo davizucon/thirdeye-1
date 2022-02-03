@@ -20,7 +20,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.pinot.thirdeye</groupId>
   <artifactId>thirdeye</artifactId>
-  <version>1.18.0-SNAPSHOT</version>
+  <version>1.27.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>thirdeye</name>
 
@@ -29,7 +29,6 @@
     <module>thirdeye-persistence</module>
     <module>thirdeye-core</module>
     <module>thirdeye-server</module>
-    <module>thirdeye-notifications</module>
 
     <!--  Build plugins -->
     <module>thirdeye-plugins</module>
@@ -52,8 +51,7 @@
   </modules>
 
   <properties>
-    <jdk.version>1.8</jdk.version>
-    <javac.version>9+181-r4173-1</javac.version>
+    <jdk.version>11</jdk.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!--  Dependency Versions -->
@@ -75,17 +73,16 @@
     <guice.version>4.2.3</guice.version>
     <handlebars.version>4.0.4</handlebars.version>
     <hsqldb.version>2.3.4</hsqldb.version>
-    <httpclient.version>4.5.2</httpclient.version>
     <jackson.version>2.10.2</jackson.version>
     <jetty.version>9.4.21.v20190926</jetty.version>
     <jfreechart.version>1.0.19</jfreechart.version>
     <jodatime.version>2.7</jodatime.version>
     <json-schema-validator.version>2.2.14</json-schema-validator.version>
     <mockito.version>1.8.4</mockito.version>
-    <mysql.connector.version>5.1.44</mysql.connector.version>
+    <mysql.connector.version>8.0.27</mysql.connector.version>
     <org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
     <parsii.version>1.5</parsii.version>
-    <pinot.version>0.7.1</pinot.version>
+    <pinot.version>0.10.0-ST.7</pinot.version>
     <quartz.version>2.2.1</quartz.version>
     <slf4j-api.version>1.7.12</slf4j-api.version>
     <swagger-annotation.version>1.5.22</swagger-annotation.version>
@@ -145,6 +142,14 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>buildnumber-maven-plugin</artifactId>
       </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>2.5</version>
+        <configuration>
+          <generateBackupPoms>false</generateBackupPoms>
+        </configuration>
+      </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
@@ -154,8 +159,7 @@
           <version>3.8.0</version>
           <configuration>
             <showWarnings>true</showWarnings>
-            <source>${jdk.version}</source>
-            <target>${jdk.version}</target>
+            <release>${jdk.version}</release>
             <annotationProcessorPaths>
               <path>
                 <groupId>org.mapstruct</groupId>
@@ -197,6 +201,10 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>3.0.0-M1</version>
           <configuration>
+            <!-- See https://winterbe.com/posts/2018/08/29/migrate-maven-projects-to-java-11-jigsaw/ -->
+            <argLine>
+              --illegal-access=permit
+            </argLine>
             <threadCount>1</threadCount>
             <systemPropertyVariables>
               <projectVersion>${project.version}</projectVersion>
@@ -406,6 +414,12 @@
         <artifactId>avro</artifactId>
         <version>${avro.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>4.5.9</version>
+      </dependency>
+
       <!-- This helps map pojos from one model to another. API <> DTO, etc -->
       <dependency>
         <groupId>org.mapstruct</groupId>
@@ -470,6 +484,12 @@
       <dependency>
         <groupId>org.testcontainers</groupId>
         <artifactId>testcontainers</artifactId>
+        <version>${testcontainers.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>mysql</artifactId>
         <version>${testcontainers.version}</version>
         <scope>test</scope>
       </dependency>
@@ -771,28 +791,6 @@
 
   <profiles>
     <profile>
-      <id>jdk8</id>
-      <activation>
-        <jdk>1.8</jdk>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <configuration>
-              <fork>true</fork>
-              <compilerArgs combine.children="append">
-                <arg>
-                  -J-Xbootclasspath/p:${settings.localRepository}/com/google/errorprone/javac/${javac.version}/javac-${javac.version}.jar
-                </arg>
-              </compilerArgs>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
       <id>bigquery</id>
       <properties>
         <avro.version>1.9.0</avro.version>
@@ -874,6 +872,10 @@
     <repository>
       <id>atlassian-public</id>
       <url>https://packages.atlassian.com/maven/repository/public</url>
+    </repository>
+    <repository>
+      <id>startree-releases</id>
+      <url>https://repo.startreedata.io/artifactory/startree-releases</url>
     </repository>
   </repositories>
 </project>

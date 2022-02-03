@@ -1,7 +1,12 @@
 import { Grid } from "@material-ui/core";
-import { JSONEditorV1 } from "@startree-ui/platform-ui";
+import {
+    JSONEditorV1,
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import { toNumber } from "lodash";
-import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
@@ -9,20 +14,17 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { DatasourceCard } from "../../components/entity-cards/datasource-card/datasource-card.component";
-import { PageContents } from "../../components/page-contents/page-contents.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import {
     deleteDatasource,
     getDatasource,
 } from "../../rest/datasources/datasources.rest";
+import { Datasource } from "../../rest/dto/datasource.interfaces";
 import { UiDatasource } from "../../rest/dto/ui-datasource.interfaces";
 import { getUiDatasource } from "../../utils/datasources/datasources.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getDatasourcesAllPath } from "../../utils/routes/routes.util";
-import {
-    getErrorSnackbarOption,
-    getSuccessSnackbarOption,
-} from "../../utils/snackbar/snackbar.util";
 import { DatasourcesViewPageParams } from "./datasources-view-page.interfaces";
 
 export const DatasourcesViewPage: FunctionComponent = () => {
@@ -30,10 +32,10 @@ export const DatasourcesViewPage: FunctionComponent = () => {
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
-    const { enqueueSnackbar } = useSnackbar();
     const params = useParams<DatasourcesViewPageParams>();
     const history = useHistory();
     const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         setPageBreadcrumbs([]);
@@ -50,12 +52,12 @@ export const DatasourcesViewPage: FunctionComponent = () => {
 
         if (!isValidNumberId(params.id)) {
             // Invalid id
-            enqueueSnackbar(
+            notify(
+                NotificationTypeV1.Error,
                 t("message.invalid-id", {
                     entity: t("label.datasource"),
                     id: params.id,
-                }),
-                getErrorSnackbarOption()
+                })
             );
 
             setUiDatasource(fetchedUiDatasource);
@@ -68,10 +70,7 @@ export const DatasourcesViewPage: FunctionComponent = () => {
                 fetchedUiDatasource = getUiDatasource(datasource);
             })
             .catch(() => {
-                enqueueSnackbar(
-                    t("message.fetch-error"),
-                    getErrorSnackbarOption()
-                );
+                notify(NotificationTypeV1.Error, t("message.fetch-error"));
             })
             .finally(() => {
                 setUiDatasource(fetchedUiDatasource);
@@ -90,29 +89,30 @@ export const DatasourcesViewPage: FunctionComponent = () => {
     const handleDatasourceDeleteOk = (uiDatasource: UiDatasource): void => {
         deleteDatasource(uiDatasource.id)
             .then(() => {
-                enqueueSnackbar(
+                notify(
+                    NotificationTypeV1.Success,
                     t("message.delete-success", {
                         entity: t("label.datasource"),
-                    }),
-                    getSuccessSnackbarOption()
+                    })
                 );
 
                 // Redirect to datasources all path
                 history.push(getDatasourcesAllPath());
             })
             .catch(() =>
-                enqueueSnackbar(
+                notify(
+                    NotificationTypeV1.Error,
                     t("message.delete-error", {
                         entity: t("label.datasource"),
-                    }),
-                    getErrorSnackbarOption()
+                    })
                 )
             );
     };
 
     return (
-        <PageContents centered title={uiDatasource ? uiDatasource.name : ""}>
-            <Grid container>
+        <PageV1>
+            <PageHeader title={uiDatasource ? uiDatasource.name : ""} />
+            <PageContentsGridV1>
                 {/* Datasource */}
                 <Grid item xs={12}>
                     <DatasourceCard
@@ -123,17 +123,12 @@ export const DatasourcesViewPage: FunctionComponent = () => {
 
                 {/* Datasource JSON viewer */}
                 <Grid item sm={12}>
-                    <JSONEditorV1
+                    <JSONEditorV1<Datasource>
                         readOnly
-                        value={
-                            (uiDatasource?.datasource as unknown) as Record<
-                                string,
-                                unknown
-                            >
-                        }
+                        value={uiDatasource?.datasource as Datasource}
                     />
                 </Grid>
-            </Grid>
-        </PageContents>
+            </PageContentsGridV1>
+        </PageV1>
     );
 };

@@ -10,6 +10,9 @@ import org.apache.pinot.thirdeye.datasource.DefaultDataSourcesPlugin;
 import org.apache.pinot.thirdeye.datasource.PinotDataSourcePlugin;
 import org.apache.pinot.thirdeye.detection.annotation.registry.DetectionRegistry;
 import org.apache.pinot.thirdeye.detection.components.DetectionComponentsPlugin;
+import org.apache.pinot.thirdeye.notification.NotificationServiceRegistry;
+import org.apache.pinot.thirdeye.notification.email.EmailNotificationServiceFactory;
+import org.apache.pinot.thirdeye.notification.webhook.WebhookNotificationServiceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +30,7 @@ public class ThirdEyeServerDebug {
 
     loadDefaultDataSources(injector.getInstance(DataSourcesLoader.class));
     loadDetectors(injector.getInstance(DetectionRegistry.class));
+    loadNotificationServiceFactories(injector.getInstance(NotificationServiceRegistry.class));
   }
 
   /**
@@ -52,9 +56,6 @@ public class ThirdEyeServerDebug {
     // Load the default data sources.
     // If there are duplicate additions, this will throw an error.
     final DetectionComponentsPlugin detectionComponentsPlugin = new DetectionComponentsPlugin();
-    detectionComponentsPlugin
-        .getAnomalyDetectorFactories()
-        .forEach(detectionRegistry::addAnomalyDetectorFactory);
 
     detectionComponentsPlugin
         .getAnomalyDetectorV2Factories()
@@ -63,5 +64,10 @@ public class ThirdEyeServerDebug {
     detectionComponentsPlugin
         .getEventTriggerFactories()
         .forEach(detectionRegistry::addEventTriggerFactory);
+  }
+
+  static void loadNotificationServiceFactories(final NotificationServiceRegistry instance) {
+    instance.addNotificationServiceFactory(new WebhookNotificationServiceFactory());
+    instance.addNotificationServiceFactory(new EmailNotificationServiceFactory());
   }
 }

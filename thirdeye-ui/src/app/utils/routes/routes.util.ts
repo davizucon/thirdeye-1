@@ -3,41 +3,42 @@ import { getRecognizedQueryString } from "../params/params.util";
 const PLACEHOLDER_ROUTE_ID = ":id";
 
 export const AppRoute = {
+    BASE: "/",
+    HOME: "/home",
     ALERTS: "/alerts",
     ALERTS_ALL: "/alerts/all",
+    ALERTS_VIEW: `/alerts/view/id/${PLACEHOLDER_ROUTE_ID}`,
     ALERTS_CREATE: "/alerts/create",
     ALERTS_UPDATE: `/alerts/update/id/${PLACEHOLDER_ROUTE_ID}`,
-    ALERTS_VIEW: `/alerts/view/id/${PLACEHOLDER_ROUTE_ID}`,
     ANOMALIES: "/anomalies",
     ANOMALIES_ALL: "/anomalies/all",
     ANOMALIES_VIEW: `/anomalies/view/id/${PLACEHOLDER_ROUTE_ID}`,
-    BASE: "/",
+    ANOMALIES_VIEW_INDEX: `/anomalies/view/id/${PLACEHOLDER_ROUTE_ID}/index`,
     CONFIGURATION: "/configuration",
-    DATASETS: "/configuration/datasets",
-    DATASETS_ALL: "/configuration/datasets/all",
-    DATASETS_ONBOARD: "/configuration/datasets/onboard",
-    DATASETS_UPDATE: `/configuration/datasets/update/id/${PLACEHOLDER_ROUTE_ID}`,
-    DATASETS_VIEW: `/configuration/datasets/view/id/${PLACEHOLDER_ROUTE_ID}`,
-    DATASOURCES: "/configuration/datasources",
-    DATASOURCES_ALL: "/configuration/datasources/all",
-    DATASOURCES_CREATE: "/configuration/datasources/create",
-    DATASOURCES_UPDATE: `/configuration/datasources/update/id/${PLACEHOLDER_ROUTE_ID}`,
-    DATASOURCES_VIEW: `/configuration/datasources/view/id/${PLACEHOLDER_ROUTE_ID}`,
-    HOME: "/home",
-    LOGIN: "/login",
-    LOGOUT: "/logout",
-    METRICS: "/configuration/metrics",
-    METRICS_ALL: "/configuration/metrics/all",
-    METRICS_CREATE: `/configuration/metrics/create`,
-    METRICS_UPDATE: `/configuration/metrics/update/id/${PLACEHOLDER_ROUTE_ID}`,
-    METRICS_VIEW: `/configuration/metrics/view/id/${PLACEHOLDER_ROUTE_ID}`,
-    ROOT_CAUSE_ANALYSIS: `/root-cause-analysis`,
-    ROOT_CAUSE_ANALYSIS_FOR_ANOMALY: `/root-cause-analysis/anomaly/${PLACEHOLDER_ROUTE_ID}`,
     SUBSCRIPTION_GROUPS: "/configuration/subscription-groups",
     SUBSCRIPTION_GROUPS_ALL: "/configuration/subscription-groups/all",
+    SUBSCRIPTION_GROUPS_VIEW: `/configuration/subscription-groups/view/id/${PLACEHOLDER_ROUTE_ID}`,
     SUBSCRIPTION_GROUPS_CREATE: "/configuration/subscription-groups/create",
     SUBSCRIPTION_GROUPS_UPDATE: `/configuration/subscription-groups/update/id/${PLACEHOLDER_ROUTE_ID}`,
-    SUBSCRIPTION_GROUPS_VIEW: `/configuration/subscription-groups/view/id/${PLACEHOLDER_ROUTE_ID}`,
+    DATASETS: "/configuration/datasets",
+    DATASETS_ALL: "/configuration/datasets/all",
+    DATASETS_VIEW: `/configuration/datasets/view/id/${PLACEHOLDER_ROUTE_ID}`,
+    DATASETS_ONBOARD: "/configuration/datasets/onboard",
+    DATASETS_UPDATE: `/configuration/datasets/update/id/${PLACEHOLDER_ROUTE_ID}`,
+    DATASOURCES: "/configuration/datasources",
+    DATASOURCES_ALL: "/configuration/datasources/all",
+    DATASOURCES_VIEW: `/configuration/datasources/view/id/${PLACEHOLDER_ROUTE_ID}`,
+    DATASOURCES_CREATE: "/configuration/datasources/create",
+    DATASOURCES_UPDATE: `/configuration/datasources/update/id/${PLACEHOLDER_ROUTE_ID}`,
+    METRICS: "/configuration/metrics",
+    METRICS_ALL: "/configuration/metrics/all",
+    METRICS_VIEW: `/configuration/metrics/view/id/${PLACEHOLDER_ROUTE_ID}`,
+    METRICS_CREATE: `/configuration/metrics/create`,
+    METRICS_UPDATE: `/configuration/metrics/update/id/${PLACEHOLDER_ROUTE_ID}`,
+    LOGIN: "/login",
+    LOGOUT: "/logout",
+    ROOT_CAUSE_ANALYSIS: `/root-cause-analysis`,
+    ROOT_CAUSE_ANALYSIS_FOR_ANOMALY: `/root-cause-analysis/anomaly/${PLACEHOLDER_ROUTE_ID}`,
 } as const;
 
 export const getBasePath = (): string => {
@@ -84,6 +85,13 @@ export const getAnomaliesAllPath = (): string => {
 
 export const getAnomaliesViewPath = (id: number): string => {
     let path: string = AppRoute.ANOMALIES_VIEW;
+    path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
+
+    return createPathWithRecognizedQueryString(path);
+};
+
+export const getAnomaliesViewIndexPath = (id: number): string => {
+    let path: string = AppRoute.ANOMALIES_VIEW_INDEX;
     path = path.replace(PLACEHOLDER_ROUTE_ID, `${id}`);
 
     return createPathWithRecognizedQueryString(path);

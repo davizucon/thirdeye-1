@@ -1,5 +1,11 @@
+import { Grid } from "@material-ui/core";
+import {
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import { toNumber } from "lodash";
-import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
@@ -7,7 +13,7 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { MetricCard } from "../../components/entity-cards/metric-card/metric-card.component";
-import { PageContents } from "../../components/page-contents/page-contents.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { UiMetric } from "../../rest/dto/ui-metric.interfaces";
 import { deleteMetric, getMetric } from "../../rest/metrics/metrics.rest";
@@ -17,10 +23,6 @@ import {
     getMetricsAllPath,
     getMetricsUpdatePath,
 } from "../../utils/routes/routes.util";
-import {
-    getErrorSnackbarOption,
-    getSuccessSnackbarOption,
-} from "../../utils/snackbar/snackbar.util";
 import { MetricsViewPageParams } from "./metrics-view-page.interfaces";
 
 export const MetricsViewPage: FunctionComponent = () => {
@@ -28,10 +30,10 @@ export const MetricsViewPage: FunctionComponent = () => {
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
-    const { enqueueSnackbar } = useSnackbar();
     const params = useParams<MetricsViewPageParams>();
     const history = useHistory();
     const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         setPageBreadcrumbs([]);
@@ -48,12 +50,12 @@ export const MetricsViewPage: FunctionComponent = () => {
 
         if (!isValidNumberId(params.id)) {
             // Invalid id
-            enqueueSnackbar(
+            notify(
+                NotificationTypeV1.Error,
                 t("message.invalid-id", {
                     entity: t("label.metric"),
                     id: params.id,
-                }),
-                getErrorSnackbarOption()
+                })
             );
 
             setUiMetric(fetchedUiMetric);
@@ -79,9 +81,9 @@ export const MetricsViewPage: FunctionComponent = () => {
 
     const handleMetricDeleteOk = (uiMetric: UiMetric): void => {
         deleteMetric(uiMetric.id).then(() => {
-            enqueueSnackbar(
-                t("message.delete-success", { entity: t("label.metric") }),
-                getSuccessSnackbarOption()
+            notify(
+                NotificationTypeV1.Success,
+                t("message.delete-success", { entity: t("label.metric") })
             );
 
             // Redirect to metrics all path
@@ -94,17 +96,18 @@ export const MetricsViewPage: FunctionComponent = () => {
     };
 
     return (
-        <PageContents
-            centered
-            hideTimeRange
-            title={uiMetric ? uiMetric.name : ""}
-        >
-            {/* Metric */}
-            <MetricCard
-                metric={uiMetric}
-                onDelete={handleMetricDelete}
-                onEdit={handleMetricEdit}
-            />
-        </PageContents>
+        <PageV1>
+            <PageHeader title={uiMetric ? uiMetric.name : ""} />
+            <PageContentsGridV1>
+                <Grid item xs={12}>
+                    {/* Metric */}
+                    <MetricCard
+                        metric={uiMetric}
+                        onDelete={handleMetricDelete}
+                        onEdit={handleMetricEdit}
+                    />
+                </Grid>
+            </PageContentsGridV1>
+        </PageV1>
     );
 };

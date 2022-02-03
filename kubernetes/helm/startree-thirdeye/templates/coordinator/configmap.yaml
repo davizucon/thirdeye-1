@@ -10,21 +10,21 @@ data:
     ######################################################
 
     server:
-      type: simple
+      type: default
       applicationContextPath: /
       adminContextPath: /admin
 
-      connector:
-        type: http
-        port: {{ .Values.coordinator.port }}
-        idleTimeout: 620s
-    #   SSL connector is disabled since APP Engine only allows exposing a single port.
-    #   A sample keystore and password is added so that this can be tested locally.
-    #   However, the settings currently don't work on GAE
-    #    - type: https
-    #      port: 8443
-    #      keyStorePath: conf/keystore.jks
-    #      keyStorePassword: password
+      applicationConnectors:
+        {{- if .Values.tls.enabled }}
+        - type: https
+          keyStorePath: /opt/thirdeye/server/keystore/keystore
+          keyStorePassword: {{ .Values.tls.password }}
+          keyStoreType: {{ .Values.tls.type }}
+        {{- else }}
+        - type: http
+        {{- end }}
+          port: {{ .Values.coordinator.port }}
+          idleTimeout: 620s
 
     logging:
       level: INFO
@@ -33,27 +33,14 @@ data:
         org.apache.zookeeper: WARN
 
     auth:
-      enabled: false
-    {{- if .Values.platformURL }}
-      infoURL: {{ .Values.platformURL }}/api/info
-    {{- end }}
-      oauth:
-    #    keysUrl: <keys url>
-        required:
-          - sub
-          - exp
-    #    exactMatch:
-    #      iss: <issuer url>
-    #    cache:
-    #      size: 64
-    #      ttl: 60000
+{{ toYaml .Values.auth | indent 6 }}
 
     database:
       # Assuming a local MySQL server running on the default port 3306
       url: jdbc:mysql://{{ .Release.Name }}-mysql/thirdeye?autoReconnect=true&useSSL=false
       user: {{ .Values.mysql.mysqlUser }}
       password: {{ .Values.mysql.mysqlPassword }}
-      driver: com.mysql.jdbc.Driver
+      driver: com.mysql.cj.jdbc.Driver
 
     swagger:
       # Enable/Disable the swagger resource. Helps in API documentation. Should be true by default

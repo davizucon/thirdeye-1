@@ -1,9 +1,11 @@
 package org.apache.pinot.thirdeye.spi.detection;
 
 import java.util.Map;
+import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.detection.v2.DataTable;
 import org.apache.pinot.thirdeye.spi.detection.v2.DetectionPipelineResult;
 import org.joda.time.Interval;
+import org.joda.time.Period;
 
 public interface AnomalyDetectorV2<T extends AbstractSpec> extends BaseComponent<T> {
 
@@ -11,14 +13,9 @@ public interface AnomalyDetectorV2<T extends AbstractSpec> extends BaseComponent
   String KEY_CURRENT = "current";
   String KEY_BASELINE = "baseline";
 
-  String COL_ANOMALY = "anomaly";
-
   /**
-   * Run detection for a given interval with provided baseline and current DataTable. Then returns
-   * the detection result.
-   *
-   * @return the detection result which contains anomalies.
+   * Run detection for a given interval with provided baseline and current DataTable.
    */
-  DetectionPipelineResult runDetection(Interval interval, Map<String, DataTable> timeSeriesMap)
+  AnomalyDetectorV2Result runDetection(Interval interval, Map<String, DataTable> timeSeriesMap)
       throws DetectorException;
 }

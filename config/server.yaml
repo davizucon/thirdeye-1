@@ -3,21 +3,18 @@
 ######################################################
 
 server:
-  type: simple
+  type: default
   applicationContextPath: /
   adminContextPath: /admin
 
-  connector:
-    type: http
-    port: 8080
-    idleTimeout: 620s
-#   SSL connector is disabled since APP Engine only allows exposing a single port.
-#   A sample keystore and password is added so that this can be tested locally.
-#   However, the settings currently don't work on GAE
-#    - type: https
-#      port: 8443
-#      keyStorePath: conf/keystore.jks
-#      keyStorePassword: password
+  applicationConnectors:
+    - type: http
+      port: 8080
+      idleTimeout: 620s
+    - type: https
+      port: 443
+      keyStorePath: config/tls-key.keystore
+      keyStorePassword: password
 
 logging:
   level: INFO
@@ -27,24 +24,23 @@ logging:
 
 auth:
   enabled: false
-#  infoURL: http://startree.ai/api/info
-  oauth:
-    keysUrl: file://<path to project dir>/config/jwks.json
-    required:
-      - sub
-      - exp
-    exactMatch:
-      iss: http://identity.startree.ai
-    cache:
-      size: 64
-      ttl: 60000
+#  oauth:
+#    serverUrl: <dex server url>
+#    required:
+#      - sub
+#      - exp
+#    exactMatch:
+#      sub: <subject name>
+#    cache:
+#      size: 64
+#      ttl: 60000
 
 database:
   # Assuming a local MySQL server running on the default port 3306
   url: jdbc:mysql://localhost/thirdeye_test?autoReconnect=true&useSSL=false
   user: uthirdeye
   password: pass
-  driver: com.mysql.jdbc.Driver
+  driver: com.mysql.cj.jdbc.Driver
 
 swagger:
   # Enable/Disable the swagger resource. Helps in API documentation. Should be true by default

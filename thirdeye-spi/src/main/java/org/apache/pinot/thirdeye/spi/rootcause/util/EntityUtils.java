@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.thirdeye.spi.rootcause.Entity;
 import org.apache.pinot.thirdeye.spi.rootcause.MaxScoreSet;
@@ -532,6 +533,7 @@ public class EntityUtils {
    * @param filterString raw (decoded) filter string
    * @return filter predicate
    */
+  // todo cyril return a Predicate
   public static FilterPredicate extractFilterPredicate(String filterString) {
     Matcher m = PATTERN_FILTER_OPERATOR.matcher(filterString);
     if (!m.find()) {
@@ -553,6 +555,10 @@ public class EntityUtils {
     String value = filterString.substring(valueStart, valueEnd);
 
     return new FilterPredicate(key, operator, value);
+  }
+
+  public static List<FilterPredicate> extractFilterPredicates(List<String> filters) {
+    return filters.stream().map(EntityUtils::extractFilterPredicate).collect(Collectors.toList());
   }
 
   public static boolean isFilterOperatorExists(String any) {

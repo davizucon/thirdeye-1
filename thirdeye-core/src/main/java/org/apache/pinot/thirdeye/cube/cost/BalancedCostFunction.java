@@ -19,6 +19,7 @@
 
 package org.apache.pinot.thirdeye.cube.cost;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.Map;
@@ -31,9 +32,10 @@ import java.util.Map;
  */
 public class BalancedCostFunction implements CostFunction {
 
-  public static final String CHANGE_CONTRIBUTION_THRESHOLD_PARAM = "threshold";
+  @VisibleForTesting
+  protected static final String CHANGE_CONTRIBUTION_THRESHOLD_PARAM = "threshold";
   // The threshold to the contribution to overall changes in percentage
-  private double changeContributionThreshold = 3d;
+  private double changeContributionThreshold = 3;
   private final double epsilon = 0.00001;
 
   public BalancedCostFunction() {
@@ -47,12 +49,9 @@ public class BalancedCostFunction implements CostFunction {
     }
   }
 
-  public double getChangeContributionThreshold() {
+  @VisibleForTesting
+  protected double getChangeContributionThreshold() {
     return changeContributionThreshold;
-  }
-
-  public void setChangeContributionThreshold(double changeContributionThreshold) {
-    this.changeContributionThreshold = changeContributionThreshold;
   }
 
   /**

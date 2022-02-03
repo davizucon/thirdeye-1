@@ -17,7 +17,6 @@ import org.apache.pinot.thirdeye.spi.api.AlertNodeApi;
 import org.apache.pinot.thirdeye.spi.api.AlertTemplateApi;
 import org.apache.pinot.thirdeye.spi.api.AnomalyApi;
 import org.apache.pinot.thirdeye.spi.api.AnomalyFeedbackApi;
-import org.apache.pinot.thirdeye.spi.api.AnomalyReportApi;
 import org.apache.pinot.thirdeye.spi.api.ApplicationApi;
 import org.apache.pinot.thirdeye.spi.api.DataSourceApi;
 import org.apache.pinot.thirdeye.spi.api.DataSourceMetaApi;
@@ -30,7 +29,6 @@ import org.apache.pinot.thirdeye.spi.api.TaskApi;
 import org.apache.pinot.thirdeye.spi.api.TimeColumnApi;
 import org.apache.pinot.thirdeye.spi.api.TimeWindowSuppressorApi;
 import org.apache.pinot.thirdeye.spi.api.UserApi;
-import org.apache.pinot.thirdeye.spi.api.WebhookApi;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertNode;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.AlertNodeType;
@@ -163,7 +161,8 @@ public abstract class ApiBeanMapper {
             .map(ApiBeanMapper::toAlertTemplateApi)
             .orElse(null))
         .setTemplateProperties(dto.getTemplateProperties())
-        .setLastTimestamp(new Date(dto.getLastTimestamp()))
+        // keep lastTimestamp internal - TE-340
+        //.setLastTimestamp(new Date(dto.getLastTimestamp()))
         .setOwner(new UserApi()
             .setPrincipal(dto.getCreatedBy()))
         ;
@@ -173,6 +172,7 @@ public abstract class ApiBeanMapper {
     return AlertTemplateMapper.INSTANCE.toApi(alertTemplateDTO);
   }
 
+  @Deprecated
   private static Map<String, AlertNodeApi> toAlertNodeApiMap(
       final Map<String, AlertNode> nodes) {
     Map<String, AlertNodeApi> map = new HashMap<>(nodes.size());
@@ -182,6 +182,7 @@ public abstract class ApiBeanMapper {
     return map;
   }
 
+  @Deprecated
   private static AlertNodeApi toAlertNodeApi(final AlertNode dto) {
     return new AlertNodeApi()
         .setName(dto.getName())
@@ -199,6 +200,7 @@ public abstract class ApiBeanMapper {
         ;
   }
 
+  @Deprecated
   public static Map<String, AlertNode> toAlertNodeMap(
       final Map<String, AlertNodeApi> nodes) {
     Map<String, AlertNode> map = new HashMap<>(nodes.size());
@@ -208,6 +210,7 @@ public abstract class ApiBeanMapper {
     return map;
   }
 
+  @Deprecated
   public static AlertNode toAlertNode(final AlertNodeApi api) {
     return new AlertNode()
         .setName(api.getName())
@@ -416,8 +419,8 @@ public abstract class ApiBeanMapper {
           );
     }
     anomalyApi.setAlert(new AlertApi()
-        .setId(dto.getDetectionConfigId())
-    )
+            .setId(dto.getDetectionConfigId())
+        )
         .setAlertNode(optional(dto.getProperties())
             .map(p -> p.get("detectorComponentName"))
             .map(ApiBeanMapper::toDetectionAlertNodeApi)
@@ -452,14 +455,5 @@ public abstract class ApiBeanMapper {
 
   public static EventDTO toEventDto(final EventApi api) {
     return EventMapper.INSTANCE.toDto(api);
-  }
-
-  public static WebhookApi toWebhookApi(final List<MergedAnomalyResultDTO> results,
-      final SubscriptionGroupDTO subscriptionGroup) {
-    return new WebhookApi()
-        .setSubscriptionGroup(toApi(subscriptionGroup))
-        .setAnomalyReports(results.stream()
-            .map(dto -> new AnomalyReportApi().setAnomaly(toApi(dto)))
-            .collect(Collectors.toList()));
   }
 }

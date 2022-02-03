@@ -47,9 +47,11 @@ public class AlertDTO extends AbstractDTO {
   DetectionHealth health;
 
   // Stores properties related to data SLA rules for every metric
+  @Deprecated
   Map<String, Object> dataQualityProperties;
 
-  // The execution dag
+  // The legacy execution dag
+  @Deprecated
   Map<String, AlertNode> nodes;
 
   // The alert template
@@ -57,8 +59,6 @@ public class AlertDTO extends AbstractDTO {
 
   // Values to be plugged into the above template
   private Map<String, Object> templateProperties;
-
-  private Boolean v1Format;
 
   @JsonIgnore
   private Map<String, BaseComponent> components = new HashMap<>();
@@ -184,10 +184,12 @@ public class AlertDTO extends AbstractDTO {
     this.health = health;
   }
 
+  @Deprecated
   public Map<String, AlertNode> getNodes() {
     return nodes;
   }
 
+  @Deprecated
   public AlertDTO setNodes(
       final Map<String, AlertNode> nodes) {
     this.nodes = nodes;

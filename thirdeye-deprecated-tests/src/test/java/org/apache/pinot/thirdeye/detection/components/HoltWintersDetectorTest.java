@@ -24,34 +24,26 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.apache.pinot.thirdeye.detection.DefaultInputDataFetcher;
 import org.apache.pinot.thirdeye.detection.MockDataProvider;
-import org.apache.pinot.thirdeye.detection.components.detectors.HoltWintersDetector;
-import org.apache.pinot.thirdeye.detection.components.detectors.HoltWintersDetectorSpec;
 import org.apache.pinot.thirdeye.spi.dataframe.DataFrame;
 import org.apache.pinot.thirdeye.spi.dataframe.util.MetricSlice;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.DatasetConfigDTO;
-import org.apache.pinot.thirdeye.spi.datalayer.dto.MergedAnomalyResultDTO;
 import org.apache.pinot.thirdeye.spi.datalayer.dto.MetricConfigDTO;
 import org.apache.pinot.thirdeye.spi.detection.AlgorithmUtils;
 import org.apache.pinot.thirdeye.spi.detection.DataProvider;
-import org.apache.pinot.thirdeye.spi.detection.model.TimeSeries;
-import org.apache.pinot.thirdeye.spi.rootcause.impl.MetricEntity;
-import org.joda.time.Interval;
-import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
 
 /**
  * Test class for HoltWinters detector
  */
 public class HoltWintersDetectorTest {
 
+  @Deprecated
   private DataProvider provider;
 
+  @Deprecated
   @BeforeTest
   public void setUp() throws Exception {
     DataFrame dailyData;
@@ -98,65 +90,5 @@ public class HoltWintersDetectorTest {
         .setTimeseries(timeseries)
         .setMetrics(Arrays.asList(hourlyMetricConfig, dailyMetricConfig))
         .setDatasets(Arrays.asList(hourlyDatasetConfig, dailyDatasetConfig));
-  }
-
-  @Test
-  public void testComputePredictedTimeSeriesDaily() {
-    HoltWintersDetector detector = new HoltWintersDetector();
-    HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
-    detector.init(spec, new DefaultInputDataFetcher(this.provider, -1));
-    Interval window = new Interval(1306627200000L, 1309219200000L);
-    String metricUrn = "thirdeye:metric:1";
-    MetricEntity me = MetricEntity.fromURN(metricUrn);
-    MetricSlice slice = MetricSlice
-        .from(me.getId(), window.getStartMillis(), window.getEndMillis(), me.getFilters());
-    TimeSeries timeSeries = detector.computePredictedTimeSeries(slice);
-
-    Assert.assertEquals(timeSeries.getPredictedBaseline().size(), 29);
-  }
-
-  @Test
-  public void testRunDetectionDaily() {
-    HoltWintersDetector detector = new HoltWintersDetector();
-    HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
-    spec.setSensitivity(10);
-    detector.init(spec, new DefaultInputDataFetcher(this.provider, -1));
-    Interval window = new Interval(1306627200000L, 1309219200000L);
-    String metricUrn = "thirdeye:metric:1";
-    List<MergedAnomalyResultDTO> anomalies = detector.runDetection(window, metricUrn)
-        .getAnomalies();
-
-    Assert.assertEquals(anomalies.size(), 6);
-  }
-
-  @Test
-  public void testComputePredictedTimeSeriesHourly() {
-    HoltWintersDetector detector = new HoltWintersDetector();
-    HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
-    detector.init(spec, new DefaultInputDataFetcher(this.provider, -1));
-
-    Interval window = new Interval(1322773200000L, 1323378000000L);
-
-    String metricUrn = "thirdeye:metric:123";
-    MetricEntity me = MetricEntity.fromURN(metricUrn);
-    MetricSlice slice = MetricSlice
-        .from(me.getId(), window.getStartMillis(), window.getEndMillis(), me.getFilters());
-    TimeSeries timeSeries = detector.computePredictedTimeSeries(slice);
-
-    Assert.assertEquals(timeSeries.getPredictedBaseline().size(), 167);
-  }
-
-  @Test
-  public void testRunDetectionHourly() {
-    HoltWintersDetector detector = new HoltWintersDetector();
-    HoltWintersDetectorSpec spec = new HoltWintersDetectorSpec();
-    spec.setSensitivity(9);
-    detector.init(spec, new DefaultInputDataFetcher(this.provider, -1));
-    Interval window = new Interval(1322773200000L, 1323378000000L);
-    String metricUrn = "thirdeye:metric:123";
-    List<MergedAnomalyResultDTO> anomalies = detector.runDetection(window, metricUrn)
-        .getAnomalies();
-
-    Assert.assertEquals(anomalies.size(), 2);
   }
 }

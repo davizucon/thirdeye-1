@@ -1,13 +1,14 @@
 import { Card, CardContent, Grid, Paper } from "@material-ui/core";
 import {
     AppLoadingIndicatorV1,
+    NotificationTypeV1,
     PageContentsGridV1,
     PageHeaderTextV1,
     PageHeaderV1,
     PageV1,
+    useNotificationProviderV1,
 } from "@startree-ui/platform-ui";
 import { toNumber } from "lodash";
-import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
@@ -26,7 +27,6 @@ import {
     getUiAnomaly,
 } from "../../utils/anomalies/anomalies.util";
 import { isValidNumberId } from "../../utils/params/params.util";
-import { getErrorSnackbarOption } from "../../utils/snackbar/snackbar.util";
 import { RootCauseAnalysisForAnomalyPageParams } from "./root-cause-analysis-for-anomaly-page.interfaces";
 
 export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
@@ -43,7 +43,7 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
     ] = useState<AlertEvaluation | null>(null);
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
-    const { enqueueSnackbar } = useSnackbar();
+    const { notify } = useNotificationProviderV1();
     const {
         id: anomalyId,
     } = useParams<RootCauseAnalysisForAnomalyPageParams>();
@@ -86,12 +86,12 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
 
     if (!isValidNumberId(anomalyId)) {
         // Invalid id
-        enqueueSnackbar(
+        notify(
+            NotificationTypeV1.Error,
             t("message.invalid-id", {
                 entity: t("label.anomaly"),
                 id: anomalyId,
-            }),
-            getErrorSnackbarOption()
+            })
         );
 
         setUiAnomaly(null);

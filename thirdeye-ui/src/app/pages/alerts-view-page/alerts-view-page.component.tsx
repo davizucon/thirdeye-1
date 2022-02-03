@@ -1,26 +1,20 @@
-import { Box, Button, Grid } from "@material-ui/core";
-import CheckIcon from "@material-ui/icons/Check";
-import CloseIcon from "@material-ui/icons/Close";
+import { Grid } from "@material-ui/core";
 import {
     AppLoadingIndicatorV1,
-    DropdownButtonTypeV1,
-    DropdownButtonV1,
-    PageContentsCardV1,
+    NotificationTypeV1,
     PageContentsGridV1,
-    PageHeaderActionsV1,
-    PageHeaderTextV1,
-    PageHeaderV1,
     PageV1,
+    useNotificationProviderV1,
 } from "@startree-ui/platform-ui";
 import { toNumber } from "lodash";
-import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
-import { AlertCardV1 } from "../../components/entity-cards/alert-card-v1/alert-card-v1.component";
+import { AlertCard } from "../../components/entity-cards/alert-card/alert-card.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
@@ -38,14 +32,7 @@ import {
     getUiAlert,
 } from "../../utils/alerts/alerts.util";
 import { isValidNumberId } from "../../utils/params/params.util";
-import {
-    getAlertsAllPath,
-    getAlertsUpdatePath,
-} from "../../utils/routes/routes.util";
-import {
-    getErrorSnackbarOption,
-    getSuccessSnackbarOption,
-} from "../../utils/snackbar/snackbar.util";
+import { getAlertsAllPath } from "../../utils/routes/routes.util";
 import { AlertsViewPageParams } from "./alerts-view-page.interfaces";
 
 export const AlertsViewPage: FunctionComponent = () => {
@@ -61,10 +48,10 @@ export const AlertsViewPage: FunctionComponent = () => {
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
-    const { enqueueSnackbar } = useSnackbar();
     const params = useParams<AlertsViewPageParams>();
     const history = useHistory();
     const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         setPageBreadcrumbs([]);
@@ -106,12 +93,12 @@ export const AlertsViewPage: FunctionComponent = () => {
 
         if (!isValidNumberId(params.id)) {
             // Invalid id
-            enqueueSnackbar(
+            notify(
+                NotificationTypeV1.Error,
                 t("message.invalid-id", {
                     entity: t("label.alert"),
                     id: params.id,
-                }),
-                getErrorSnackbarOption()
+                })
             );
 
             setUiAlert(fetchedUiAlert);
@@ -149,9 +136,9 @@ export const AlertsViewPage: FunctionComponent = () => {
         }
 
         updateAlert(uiAlert.alert).then((alert) => {
-            enqueueSnackbar(
-                t("message.update-success", { entity: t("label.alert") }),
-                getSuccessSnackbarOption()
+            notify(
+                NotificationTypeV1.Success,
+                t("message.update-success", { entity: t("label.alert") })
             );
 
             // Replace updated alert as fetched alert
@@ -173,9 +160,9 @@ export const AlertsViewPage: FunctionComponent = () => {
 
     const handleAlertDeleteOk = (uiAlert: UiAlert): void => {
         deleteAlert(uiAlert.id).then(() => {
-            enqueueSnackbar(
-                t("message.delete-success", { entity: t("label.alert") }),
-                getSuccessSnackbarOption()
+            notify(
+                NotificationTypeV1.Success,
+                t("message.delete-success", { entity: t("label.alert") })
             );
 
             // Redirect to alerts all path
@@ -183,109 +170,28 @@ export const AlertsViewPage: FunctionComponent = () => {
         });
     };
 
-    const handleAlertStateToggle = (): void => {
-        if (uiAlert && uiAlert.alert) {
-            uiAlert.alert.active = !uiAlert.alert.active;
-            handleAlertChange(uiAlert);
-        }
-    };
-
-    const handleAlertEdit = (): void => {
-        if (uiAlert) {
-            history.push(getAlertsUpdatePath(uiAlert.id));
-        }
-    };
-
-    const handleAlertMenuOnclick = (id: number | string, _: string): void => {
-        switch (id) {
-            case "activateDeactivateAlert":
-                handleAlertStateToggle();
-
-                break;
-            case "editAlert":
-                handleAlertEdit();
-
-                break;
-            case "deleteAlert":
-                handleAlertDelete();
-
-                break;
-            default:
-                break;
-        }
-    };
-
-    const alertMenuItems = [
-        {
-            id: "activateDeactivateAlert",
-            text: uiAlert?.active
-                ? t("label.deactivate-entity", {
-                      entity: t("label.alert"),
-                  })
-                : t("label.activate-entity", {
-                      entity: t("label.alert"),
-                  }),
-        },
-        {
-            id: "editAlert",
-            text: t("label.edit-entity", {
-                entity: t("label.alert"),
-            }),
-        },
-        {
-            id: "deleteAlert",
-            text: t("label.delete-entity", {
-                entity: t("label.alert"),
-            }),
-        },
-    ];
-
-    return !uiAlert ? (
+    return !uiAlert || !alertEvaluation ? (
         <AppLoadingIndicatorV1 />
     ) : (
         <PageV1>
-            <PageHeaderV1>
-                <PageHeaderTextV1>
-                    {uiAlert.name}
-                    <Box component="span" paddingLeft={3}>
-                        <Button
-                            disableRipple
-                            startIcon={
-                                uiAlert.active ? (
-                                    <CheckIcon color="primary" />
-                                ) : (
-                                    <CloseIcon color="error" />
-                                )
-                            }
-                        >
-                            {t("label.active")}
-                        </Button>
-                    </Box>
-                </PageHeaderTextV1>
-                <PageHeaderActionsV1>
-                    <DropdownButtonV1
-                        dropdownMenuItems={alertMenuItems}
-                        type={DropdownButtonTypeV1.MoreOptions}
-                        onClick={handleAlertMenuOnclick}
-                    >
-                        {t("label.create")}
-                    </DropdownButtonV1>
-                </PageHeaderActionsV1>
-            </PageHeaderV1>
+            <PageHeader showTimeRange title={uiAlert.name} />
 
             <PageContentsGridV1>
                 {/* Alert Details Card*/}
                 <Grid item xs={12}>
-                    <PageContentsCardV1>
-                        <AlertCardV1 showCreatedBy uiAlert={uiAlert} />
-                    </PageContentsCardV1>
+                    <AlertCard
+                        alertEvaluation={alertEvaluation}
+                        uiAlert={uiAlert}
+                        onChange={handleAlertChange}
+                        onDelete={handleAlertDelete}
+                    />
                 </Grid>
 
                 {/* Alert evaluation time series */}
                 <Grid item xs={12}>
                     <AlertEvaluationTimeSeriesCard
                         alertEvaluation={alertEvaluation}
-                        alertEvaluationTimeSeriesHeight={300}
+                        alertEvaluationTimeSeriesHeight={500}
                         title={uiAlert.name}
                         onRefresh={fetchAlertEvaluation}
                     />

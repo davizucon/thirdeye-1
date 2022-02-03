@@ -59,7 +59,7 @@ const PADDING_TOP_SVG = 10;
 const PADDING_BOTTOM_SVG = 30;
 const PADDING_LEFT_SVG = 50;
 const PADDING_RIGHT_SVG = 50;
-const HEIGHT_SEPARATOR_TIME_SERIES_BRUSH = 50;
+const HEIGHT_SEPARATOR_TIME_SERIES_BRUSH = 60;
 const HEIGHT_BRUSH = 90;
 const HEIGHT_LEGEND_XS = 55;
 const HEIGHT_LEGEND_SM_UP = 25;
@@ -109,7 +109,7 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
         filteredAlertEvaluationAnomalies: [],
         currentPlotVisible: true,
         baselinePlotVisible: true,
-        upperAndLowerBoundPlotVisible: true,
+        upperAndLowerBoundPlotVisible: false,
         anomaliesPlotVisible: true,
     });
     const {
@@ -520,14 +520,17 @@ const AlertEvaluationTimeSeriesInternal: FunctionComponent<AlertEvaluationTimeSe
                         <Group opacity={0.5}>
                             {/* Time series plot */}
                             <AlertEvaluationTimeSeriesPlot
-                                anomalies
-                                baseline
-                                current
                                 alertEvaluationAnomalies={
                                     alertEvaluationAnomalies
                                 }
                                 alertEvaluationTimeSeriesPoints={
                                     alertEvaluationTimeSeriesPoints
+                                }
+                                anomalies={anomaliesPlotVisible}
+                                baseline={baselinePlotVisible}
+                                current={currentPlotVisible}
+                                upperAndLowerBound={
+                                    upperAndLowerBoundPlotVisible
                                 }
                                 xScale={brushXScale}
                                 yScale={brushYScale}

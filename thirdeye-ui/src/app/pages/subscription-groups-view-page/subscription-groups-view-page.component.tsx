@@ -1,6 +1,11 @@
 import { Grid } from "@material-ui/core";
+import {
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import { cloneDeep, toNumber } from "lodash";
-import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
@@ -8,7 +13,7 @@ import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcru
 import { useDialog } from "../../components/dialogs/dialog-provider/dialog-provider.component";
 import { DialogType } from "../../components/dialogs/dialog-provider/dialog-provider.interfaces";
 import { SubscriptionGroupCard } from "../../components/entity-cards/subscription-group-card/subscription-group-card.component";
-import { PageContents } from "../../components/page-contents/page-contents.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import { SubscriptionGroupAlertsAccordian } from "../../components/subscription-group-alerts-accordian/subscription-group-alerts-accordian.component";
 import { SubscriptionGroupEmailsAccordian } from "../../components/subscription-group-emails-accordian/subscription-group-emails-accordian.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
@@ -26,10 +31,6 @@ import {
 } from "../../rest/subscription-groups/subscription-groups.rest";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getSubscriptionGroupsAllPath } from "../../utils/routes/routes.util";
-import {
-    getErrorSnackbarOption,
-    getSuccessSnackbarOption,
-} from "../../utils/snackbar/snackbar.util";
 import { getUiSubscriptionGroup } from "../../utils/subscription-groups/subscription-groups.util";
 import { SubscriptionGroupsViewPageParams } from "./subscription-groups-view-page.interfaces";
 
@@ -42,10 +43,10 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
     const { showDialog } = useDialog();
-    const { enqueueSnackbar } = useSnackbar();
     const params = useParams<SubscriptionGroupsViewPageParams>();
     const history = useHistory();
     const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         setPageBreadcrumbs([]);
@@ -63,12 +64,12 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
 
         if (!isValidNumberId(params.id)) {
             // Invalid id
-            enqueueSnackbar(
+            notify(
+                NotificationTypeV1.Error,
                 t("message.invalid-id", {
                     entity: t("label.subscription-group"),
                     id: params.id,
-                }),
-                getErrorSnackbarOption()
+                })
             );
 
             setUiSubscriptionGroup(fetchedUiSubscriptionGroup);
@@ -116,11 +117,11 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
         uiSubscriptionGroup: UiSubscriptionGroup
     ): void => {
         deleteSubscriptionGroup(uiSubscriptionGroup.id).then(() => {
-            enqueueSnackbar(
+            notify(
+                NotificationTypeV1.Success,
                 t("message.delete-success", {
                     entity: t("label.subscription-group"),
-                }),
-                getSuccessSnackbarOption()
+                })
             );
 
             // Redirect to subscription groups all path
@@ -176,11 +177,11 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
         subscriptionGroup: SubscriptionGroup
     ): void => {
         updateSubscriptionGroup(subscriptionGroup).then((subscriptionGroup) => {
-            enqueueSnackbar(
+            notify(
+                NotificationTypeV1.Success,
                 t("message.update-success", {
                     entity: t("label.subscription-group"),
-                }),
-                getSuccessSnackbarOption()
+                })
             );
 
             // Replace updated subscription group as fetched subscription group
@@ -191,12 +192,11 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
     };
 
     return (
-        <PageContents
-            centered
-            hideTimeRange
-            title={uiSubscriptionGroup ? uiSubscriptionGroup.name : ""}
-        >
-            <Grid container>
+        <PageV1>
+            <PageHeader
+                title={uiSubscriptionGroup ? uiSubscriptionGroup.name : ""}
+            />
+            <PageContentsGridV1>
                 {/* Subscription Group */}
                 <Grid item xs={12}>
                     <SubscriptionGroupCard
@@ -223,7 +223,7 @@ export const SubscriptionGroupsViewPage: FunctionComponent = () => {
                         onChange={handleSubscriptionGroupEmailsChange}
                     />
                 </Grid>
-            </Grid>
-        </PageContents>
+            </PageContentsGridV1>
+        </PageV1>
     );
 };

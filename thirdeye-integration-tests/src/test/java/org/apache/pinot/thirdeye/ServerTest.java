@@ -29,6 +29,7 @@ import javax.ws.rs.core.Form;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 import org.apache.pinot.thirdeye.config.ThirdEyeServerConfiguration;
+import org.apache.pinot.thirdeye.database.ThirdEyeH2DatabaseServer;
 import org.apache.pinot.thirdeye.spi.api.AlertEvaluationApi;
 import org.apache.pinot.thirdeye.spi.api.DataSourceApi;
 import org.apache.pinot.thirdeye.spi.api.DatasetApi;
@@ -85,6 +86,7 @@ public class ServerTest {
   }
 
   private void setupPluginsDirAbsolutePath() {
+    // fixme cyril dependency on distribution - prevents parallel testing
     final String projectBuildDirectory = requireNonNull(System.getProperty("projectBuildDirectory"),
         "project build dir not set");
     final String projectVersion = requireNonNull(System.getProperty("projectVersion"),
@@ -162,7 +164,6 @@ public class ServerTest {
         .post(Entity.json(entity));
 
     assertThat(response.getStatus()).isEqualTo(200);
-
     final AlertEvaluationApi alertEvaluationApi = response.readEntity(AlertEvaluationApi.class);
     assertThat(alertEvaluationApi).isNotNull();
   }

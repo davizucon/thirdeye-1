@@ -1,7 +1,9 @@
-import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
+import {
+    AppLoadingIndicatorV1,
+    useAuthProviderV1,
+} from "@startree-ui/platform-ui";
 import React, { FunctionComponent, lazy, Suspense } from "react";
 import { Route, Switch } from "react-router-dom";
-import { useAuth } from "../../components/auth-provider/auth-provider.component";
 import { AppRoute } from "../../utils/routes/routes.util";
 import { RootCauseAnalysisRouter } from "../root-cause-analysis/rca.router";
 
@@ -36,7 +38,7 @@ const GeneralUnauthenticatedRouter = lazy(() =>
 );
 
 export const AppRouter: FunctionComponent = () => {
-    const { authDisabled, authenticated } = useAuth();
+    const { authDisabled, authenticated } = useAuthProviderV1();
 
     if (authDisabled || authenticated) {
         return (
@@ -57,7 +59,7 @@ export const AppRouter: FunctionComponent = () => {
                         path={AppRoute.CONFIGURATION}
                     />
 
-                    {/* Direct all configuration paths to root cause analysis router */}
+                    {/* Direct all rca paths root cause analysis router */}
                     <Route
                         component={RootCauseAnalysisRouter}
                         path={AppRoute.ROOT_CAUSE_ANALYSIS}

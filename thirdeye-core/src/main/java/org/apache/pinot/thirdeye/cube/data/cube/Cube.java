@@ -38,7 +38,7 @@ import java.util.Set;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.pinot.thirdeye.cube.cost.CostFunction;
-import org.apache.pinot.thirdeye.cube.data.dbclient.CubeClient;
+import org.apache.pinot.thirdeye.cube.data.dbclient.CubeFetcher;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Dimensions;
 import org.apache.pinot.thirdeye.cube.data.dbrow.Row;
 import org.apache.pinot.thirdeye.cube.data.node.CubeNode;
@@ -121,8 +121,7 @@ public class Cube { // the cube (Ca|Cb)
 
   /**
    * Automatically orders of the given dimensions depending on their error cost and builds the
-   * subcube of data according
-   * to that order.
+   * subcube of data according to that order.
    *
    * @param olapClient the client to retrieve the data.
    * @param dimensions the dimensions to be ordered.
@@ -131,7 +130,7 @@ public class Cube { // the cube (Ca|Cb)
    * @param hierarchy the hierarchy among the given dimensions, whose order will be honors
    *     before dimensions' cost.
    */
-  public void buildWithAutoDimensionOrder(CubeClient olapClient,
+  public void buildWithAutoDimensionOrder(CubeFetcher olapClient,
       Dimensions dimensions, Multimap<String, String> dataFilter, int depth,
       List<List<String>> hierarchy)
       throws Exception {
@@ -168,7 +167,7 @@ public class Cube { // the cube (Ca|Cb)
    * @param dimensions the dimensions, whose order has been given, of the subcube.
    * @param dataFilter the filter to be applied on the incoming data.
    */
-  public void buildWithManualDimensionOrder(CubeClient olapClient, Dimensions dimensions,
+  public void buildWithManualDimensionOrder(CubeFetcher olapClient, Dimensions dimensions,
       Multimap<String, String> dataFilter)
       throws Exception {
     long tStart = System.nanoTime();
@@ -190,7 +189,7 @@ public class Cube { // the cube (Ca|Cb)
    * @param dimensions the given dimension order.
    * @param dataFilter the data filter to applied on the data cube.
    */
-  private void buildSubCube(CubeClient olapClient, Dimensions dimensions,
+  private void buildSubCube(CubeFetcher olapClient, Dimensions dimensions,
       Multimap<String, String> dataFilter)
       throws Exception {
     Preconditions.checkArgument((dimensions != null && dimensions.size() != 0),
@@ -230,7 +229,7 @@ public class Cube { // the cube (Ca|Cb)
    *
    * @throws Exception An exception is thrown if OLAP database cannot be connected.
    */
-  private void initializeBasicInfo(CubeClient olapClient, Multimap<String, String> filterSets)
+  private void initializeBasicInfo(CubeFetcher olapClient, Multimap<String, String> filterSets)
       throws Exception {
 
     Row topAggValues = olapClient.getTopAggregatedValues(filterSets);
@@ -308,7 +307,7 @@ public class Cube { // the cube (Ca|Cb)
     return hierarchicalNodes;
   }
 
-  private List<DimNameValueCostEntry> computeOneDimensionCost(CubeClient olapClient,
+  private List<DimNameValueCostEntry> computeOneDimensionCost(CubeFetcher olapClient,
       double topBaselineValue,
       double topCurrentValue, double topBaselineSize, double topCurrentSize, Dimensions dimensions,
       Multimap<String, String> filterSets) throws Exception {

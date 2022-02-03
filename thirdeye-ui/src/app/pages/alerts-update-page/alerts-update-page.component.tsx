@@ -1,12 +1,18 @@
-import { AppLoadingIndicatorV1 } from "@startree-ui/platform-ui";
+import { Grid } from "@material-ui/core";
+import {
+    AppLoadingIndicatorV1,
+    NotificationTypeV1,
+    PageContentsGridV1,
+    PageV1,
+    useNotificationProviderV1,
+} from "@startree-ui/platform-ui";
 import { assign, isEmpty, toNumber } from "lodash";
-import { useSnackbar } from "notistack";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory, useParams } from "react-router-dom";
 import { AlertWizard } from "../../components/alert-wizard/alert-wizard.component";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
-import { PageContents } from "../../components/page-contents/page-contents.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { useGetEvaluation } from "../../rest/alerts/alerts.actions";
 import {
@@ -24,10 +30,6 @@ import {
 import { createAlertEvaluation } from "../../utils/alerts/alerts.util";
 import { isValidNumberId } from "../../utils/params/params.util";
 import { getAlertsViewPath } from "../../utils/routes/routes.util";
-import {
-    getErrorSnackbarOption,
-    getSuccessSnackbarOption,
-} from "../../utils/snackbar/snackbar.util";
 import { AlertsUpdatePageParams } from "./alerts-update-page.interfaces";
 
 export const AlertsUpdatePage: FunctionComponent = () => {
@@ -36,10 +38,10 @@ export const AlertsUpdatePage: FunctionComponent = () => {
     const [alert, setAlert] = useState<Alert>();
     const { setPageBreadcrumbs } = useAppBreadcrumbs();
     const { timeRangeDuration } = useTimeRange();
-    const { enqueueSnackbar } = useSnackbar();
     const params = useParams<AlertsUpdatePageParams>();
     const history = useHistory();
     const { t } = useTranslation();
+    const { notify } = useNotificationProviderV1();
 
     useEffect(() => {
         // Create page breadcrumbs
@@ -72,9 +74,9 @@ export const AlertsUpdatePage: FunctionComponent = () => {
 
         updateAlert(newAlert)
             .then((alert: Alert): void => {
-                enqueueSnackbar(
-                    t("message.update-success", { entity: t("label.alert") }),
-                    getSuccessSnackbarOption()
+                notify(
+                    NotificationTypeV1.Success,
+                    t("message.update-success", { entity: t("label.alert") })
                 );
 
                 if (
@@ -114,19 +116,19 @@ export const AlertsUpdatePage: FunctionComponent = () => {
 
                 updateSubscriptionGroups(subscriptionGroupsToBeUpdated)
                     .then((): void => {
-                        enqueueSnackbar(
+                        notify(
+                            NotificationTypeV1.Success,
                             t("message.update-success", {
                                 entity: t("label.subscription-groups"),
-                            }),
-                            getSuccessSnackbarOption()
+                            })
                         );
                     })
                     .catch((): void => {
-                        enqueueSnackbar(
+                        notify(
+                            NotificationTypeV1.Error,
                             t("message.update-error", {
                                 entity: t("label.subscription-groups"),
-                            }),
-                            getErrorSnackbarOption()
+                            })
                         );
                     })
                     .finally((): void => {
@@ -135,9 +137,9 @@ export const AlertsUpdatePage: FunctionComponent = () => {
                     });
             })
             .catch((): void => {
-                enqueueSnackbar(
-                    t("message.update-error", { entity: t("label.alert") }),
-                    getErrorSnackbarOption()
+                notify(
+                    NotificationTypeV1.Error,
+                    t("message.update-error", { entity: t("label.alert") })
                 );
             });
     };
@@ -155,18 +157,19 @@ export const AlertsUpdatePage: FunctionComponent = () => {
             newSubscriptionGroup = await createSubscriptionGroup(
                 subscriptionGroup
             );
-            enqueueSnackbar(
+
+            notify(
+                NotificationTypeV1.Success,
                 t("message.create-success", {
                     entity: t("label.subscription-group"),
-                }),
-                getSuccessSnackbarOption()
+                })
             );
         } catch (error) {
-            enqueueSnackbar(
+            notify(
+                NotificationTypeV1.Error,
                 t("message.create-error", {
                     entity: t("label.subscription-group"),
-                }),
-                getErrorSnackbarOption()
+                })
             );
         }
 
@@ -180,7 +183,7 @@ export const AlertsUpdatePage: FunctionComponent = () => {
         try {
             fetchedSubscriptionGroups = await getAllSubscriptionGroups();
         } catch (error) {
-            enqueueSnackbar(t("message.fetch-error"), getErrorSnackbarOption());
+            notify(NotificationTypeV1.Error, t("message.fetch-error"));
         }
 
         return fetchedSubscriptionGroups;
@@ -191,7 +194,7 @@ export const AlertsUpdatePage: FunctionComponent = () => {
         try {
             fetchedAlerts = await getAllAlerts();
         } catch (error) {
-            enqueueSnackbar(t("message.fetch-error"), getErrorSnackbarOption());
+            notify(NotificationTypeV1.Error, t("message.fetch-error"));
         }
 
         return fetchedAlerts;
@@ -218,12 +221,12 @@ export const AlertsUpdatePage: FunctionComponent = () => {
     const fetchAlert = (): void => {
         // Validate id from URL
         if (!isValidNumberId(params.id)) {
-            enqueueSnackbar(
+            notify(
+                NotificationTypeV1.Error,
                 t("message.invalid-id", {
                     entity: t("label.alert"),
                     id: params.id,
-                }),
-                getErrorSnackbarOption()
+                })
             );
             setLoading(false);
 
@@ -235,10 +238,7 @@ export const AlertsUpdatePage: FunctionComponent = () => {
                 setAlert(alert);
             })
             .catch(() => {
-                enqueueSnackbar(
-                    t("message.fetch-error"),
-                    getErrorSnackbarOption()
-                );
+                notify(NotificationTypeV1.Error, t("message.fetch-error"));
             })
             .finally((): void => {
                 setLoading(false);
@@ -250,17 +250,26 @@ export const AlertsUpdatePage: FunctionComponent = () => {
     }
 
     return (
-        <PageContents centered title={t("label.update")}>
-            <AlertWizard
-                alert={alert}
-                getAlertEvaluation={fetchAlertEvaluation}
-                getAllAlerts={fetchAllAlerts}
-                getAllSubscriptionGroups={fetchAllSubscriptionGroups}
-                onFinish={onAlertWizardFinish}
-                onSubscriptionGroupWizardFinish={
-                    onSubscriptionGroupWizardFinish
-                }
+        <PageV1>
+            <PageHeader
+                title={t("label.update-entity", {
+                    entity: t("label.alert"),
+                })}
             />
-        </PageContents>
+            <PageContentsGridV1>
+                <Grid item xs={12}>
+                    <AlertWizard
+                        alert={alert}
+                        getAlertEvaluation={fetchAlertEvaluation}
+                        getAllAlerts={fetchAllAlerts}
+                        getAllSubscriptionGroups={fetchAllSubscriptionGroups}
+                        onFinish={onAlertWizardFinish}
+                        onSubscriptionGroupWizardFinish={
+                            onSubscriptionGroupWizardFinish
+                        }
+                    />
+                </Grid>
+            </PageContentsGridV1>
+        </PageV1>
     );
 };

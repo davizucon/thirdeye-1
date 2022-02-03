@@ -6,12 +6,16 @@ import org.apache.pinot.thirdeye.cube.data.dbrow.DimensionValues;
 
 public class NameTag {
 
+  public static final String ALL = "(ALL)";
+  public static final String ALL_OTHERS = "(ALL_OTHERS)";
+  public static final String EMPTY = "";
+
   public final List<String> names;
 
   NameTag(int levelCount) {
     names = new ArrayList<>(levelCount);
     for (int i = 0; i < levelCount; ++i) {
-      names.add(Summary.ALL);
+      names.add(ALL);
     }
   }
 
@@ -25,11 +29,11 @@ public class NameTag {
     }
   }
 
-  void setNotAll(int index) {
-    names.set(index, Summary.NOT_ALL);
+  void setAllOthers(int index) {
+    names.set(index, ALL_OTHERS);
   }
 
   void setEmpty(int index) {
-    names.set(index, Summary.EMPTY);
+    names.set(index, EMPTY);
   }
 }

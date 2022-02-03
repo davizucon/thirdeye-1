@@ -99,16 +99,17 @@ public final class ParsedUrn {
    * @deprecated Prefer manipulating FilterPredicate directly with getPredicates()
    * @return filter multimap from predicates
    */
-  // TODO use FilterPredicates throughout RCA framework
+  // TODO prefer Predicate in all ThirdEye - see buildFilter in CrudResource
   @Deprecated
-  public Multimap<String, String> toFilters() {
-    return toFilters(this.predicates);
+  public Multimap<String, String> toFiltersMap() {
+    return toFiltersMap(this.predicates);
   }
 
   /**
    * For transition to FilterPredicate only. Prefer manipulating FilterPredicate directly.
    * */
-  public static Multimap<String, String> toFilters(Collection<FilterPredicate> predicates) {
+  @Deprecated
+  public static Multimap<String, String> toFiltersMap(Collection<FilterPredicate> predicates) {
     Multimap<String, String> filters = TreeMultimap.create();
     for (FilterPredicate predicate : predicates) {
       if (!OPERATOR_TO_FILTER.containsKey(predicate.operator)) {

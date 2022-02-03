@@ -87,6 +87,25 @@ smtp:
   secretKeyRef:
     name: smtp-credentials
 
+tls:
+  enabled: false
+  password: password
+  type: PKCS12
+
+auth:
+  enabled: false
+  oauth:
+#    serverUrl: <dex server url>
+#    keysUrl: <keys url>
+    required:
+     - sub
+     - exp
+#    exactMatch:
+#      iss: <issuer url>
+#    cache:
+#      size: 64
+#      ttl: 60000
+
 # Do not remove me.
 config:
   description: placeholder for common configs accross coordinator and worker
