@@ -5,6 +5,7 @@ import React, { FunctionComponent, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { ActionStatus } from "../../../../rest/actions.interfaces";
 import { useGetAlert } from "../../../../rest/alerts/alerts.actions";
+import { useCommonStyles } from "../../../../utils/material-ui/common.styles";
 import { NoDataIndicator } from "../../../no-data-indicator/no-data-indicator.component";
 import { AnomalySummaryCardProps } from "./anomaly-summary-card.interfaces";
 import { useAnomalySummaryCardStyles } from "./anomaly-summary-card.styles";
@@ -14,6 +15,7 @@ export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = (
 ) => {
     const { alert, getAlert, status } = useGetAlert();
     const anomalySummaryCardStyles = useAnomalySummaryCardStyles();
+    const commonClasses = useCommonStyles();
     const { t } = useTranslation();
     const { uiAnomaly } = props;
 
@@ -22,8 +24,6 @@ export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = (
             getAlert(uiAnomaly.alertId);
         }
     }, [uiAnomaly]);
-
-    console.log(alert);
 
     return (
         <Card variant="outlined">
@@ -71,7 +71,9 @@ export const AnomalySummaryCard: FunctionComponent<AnomalySummaryCardProps> = (
                                 <Grid
                                     container
                                     className={
-                                        anomalySummaryCardStyles.deviationValue
+                                        uiAnomaly.negativeDeviation
+                                            ? commonClasses.decreased
+                                            : commonClasses.increased
                                     }
                                     spacing={0}
                                 >

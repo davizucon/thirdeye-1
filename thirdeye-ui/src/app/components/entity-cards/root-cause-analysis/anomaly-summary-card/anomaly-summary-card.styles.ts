@@ -8,7 +8,4 @@ export const useAnomalySummaryCardStyles = makeStyles(() => ({
     valueText: {
         fontSize: "24px",
     },
-    deviationValue: {
-        color: "#EE0202",
-    },
 }));

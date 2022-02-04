@@ -3,8 +3,6 @@ import {
     AppLoadingIndicatorV1,
     NotificationTypeV1,
     PageContentsGridV1,
-    PageHeaderTextV1,
-    PageHeaderV1,
     PageV1,
     useNotificationProviderV1,
 } from "@startree-ui/platform-ui";
@@ -12,9 +10,11 @@ import { toNumber } from "lodash";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
+import { AnomalyBreakdownComparisonHeatmap } from "../../components/anomaly-breakdown-comparison-heatmap/anomaly-breakdown-comparison-heatmap.component";
 import { useAppBreadcrumbs } from "../../components/app-breadcrumbs/app-breadcrumbs-provider/app-breadcrumbs-provider.component";
 import { AnomalySummaryCard } from "../../components/entity-cards/root-cause-analysis/anomaly-summary-card/anomaly-summary-card.component";
 import { NoDataIndicator } from "../../components/no-data-indicator/no-data-indicator.component";
+import { PageHeader } from "../../components/page-header/page-header.component";
 import { useTimeRange } from "../../components/time-range/time-range-provider/time-range-provider.component";
 import { AlertEvaluationTimeSeriesCard } from "../../components/visualizations/alert-evaluation-time-series-card/alert-evaluation-time-series-card.component";
 import { ActionStatus } from "../../rest/actions.interfaces";
@@ -114,9 +114,7 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
 
     return (
         <PageV1>
-            <PageHeaderV1>
-                <PageHeaderTextV1>{pageTitle}</PageHeaderTextV1>
-            </PageHeaderV1>
+            <PageHeader showTimeRange title={pageTitle} />
             <PageContentsGridV1>
                 {/* Anomaly Summary */}
                 <Grid item xs={12}>
@@ -141,6 +139,7 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
                         )}
                     </Paper>
                 </Grid>
+
                 {/* Trending */}
                 <Grid item xs={12}>
                     <Paper elevation={0}>
@@ -151,6 +150,14 @@ export const RootCauseAnalysisForAnomalyPage: FunctionComponent = () => {
                             onRefresh={fetchAlertEvaluation}
                         />
                     </Paper>
+                </Grid>
+
+                {/* Trending */}
+                <Grid item xs={12}>
+                    <AnomalyBreakdownComparisonHeatmap
+                        anomaly={anomaly}
+                        anomalyId={toNumber(anomalyId)}
+                    />
                 </Grid>
             </PageContentsGridV1>
         </PageV1>
